@@ -35,6 +35,7 @@ import Control.Lens (
 import Control.Lens qualified as Lens
 import Control.Monad qualified as Monad
 import Control.Monad.Reader qualified as Reader
+import Data.Aeson
 import Data.Functor.Const (
     Const (..),
  )
@@ -185,6 +186,7 @@ data TermLikeF variable child
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance (Unparse variable, Unparse child) => Unparse (TermLikeF variable child) where
     unparse = Unparser.unparseGeneric
@@ -651,6 +653,11 @@ newtype TermLike variable = TermLike
     deriving stock (GHC.Generic)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug)
+
+
+instance ToJSON v => ToJSON (TermLike v) where toJSON = toJSON . tailF . getTermLike
+instance FromJSON v => FromJSON (TermLike v) where parseJSON = fail . show
+
 
 instance (Debug variable, Diff variable) => Diff (TermLike variable) where
     diffPrec

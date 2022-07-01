@@ -8,6 +8,7 @@ module Kore.Internal.ApplicationSorts (
     symbolOrAliasSorts,
 ) where
 
+import Data.Aeson
 import Data.Map.Strict (
     Map,
  )
@@ -31,6 +32,7 @@ data ApplicationSorts = ApplicationSorts
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 applicationSorts :: [Sort] -> Sort -> ApplicationSorts
 applicationSorts = ApplicationSorts

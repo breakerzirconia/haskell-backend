@@ -6,6 +6,7 @@ module Kore.Syntax.Ceil (
     Ceil (..),
 ) where
 
+import Data.Aeson
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
 import Kore.Attribute.Pattern.FreeVariables
@@ -35,6 +36,7 @@ data Ceil sort child = Ceil
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse child => Unparse (Ceil Sort child) where
     unparse Ceil{ceilOperandSort, ceilResultSort, ceilChild} =

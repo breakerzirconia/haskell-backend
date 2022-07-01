@@ -6,6 +6,7 @@ module Kore.Internal.InternalBool (
     InternalBool (..),
 ) where
 
+import Data.Aeson
 import Data.Functor.Const
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
@@ -32,6 +33,7 @@ data InternalBool = InternalBool
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse InternalBool where
     unparse InternalBool{internalBoolSort, internalBoolValue} =

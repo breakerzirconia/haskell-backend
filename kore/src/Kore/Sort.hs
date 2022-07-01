@@ -41,6 +41,7 @@ import Control.Exception (
     Exception (..),
     throw,
  )
+import Data.Aeson
 import Data.Align
 import Data.Map.Strict qualified as Map
 import Data.These
@@ -63,6 +64,7 @@ newtype SortVariable = SortVariable
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse SortVariable where
     unparse = unparse . getSortVariable
@@ -80,6 +82,7 @@ data SortActual = SortActual
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse SortActual where
     unparse SortActual{sortActualName, sortActualSorts} =
@@ -105,6 +108,7 @@ data Sort
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse Sort where
     unparse =

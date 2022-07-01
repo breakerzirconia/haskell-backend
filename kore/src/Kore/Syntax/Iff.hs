@@ -6,6 +6,7 @@ module Kore.Syntax.Iff (
     Iff (..),
 ) where
 
+import Data.Aeson
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
 import Kore.Attribute.Pattern.FreeVariables
@@ -31,6 +32,7 @@ data Iff sort child = Iff
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse child => Unparse (Iff Sort child) where
     unparse Iff{iffSort, iffFirst, iffSecond} =

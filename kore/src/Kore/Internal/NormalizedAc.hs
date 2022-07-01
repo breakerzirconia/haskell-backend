@@ -38,6 +38,7 @@ import Control.Lens qualified as Lens
 import Control.Lens.Iso (
     Iso',
  )
+import Data.Aeson (ToJSON(..), FromJSON(..))
 import Data.HashMap.Strict (
     HashMap,
  )
@@ -412,6 +413,9 @@ data InternalAc key (normalized :: Type -> Type -> Type) child = InternalAc
     deriving stock (Foldable, Functor, Traversable)
     deriving stock (GHC.Generic)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
+
+instance ToJSON (InternalAc k n c) where toJSON = error "InternalAc"
+instance FromJSON (InternalAc k n c) where parseJSON = fail . show
 
 instance
     Hashable (normalized key child) =>

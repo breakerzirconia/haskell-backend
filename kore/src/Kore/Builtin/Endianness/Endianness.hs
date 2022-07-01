@@ -7,6 +7,7 @@ module Kore.Builtin.Endianness.Endianness (
     toApplication,
 ) where
 
+import Data.Aeson
 import Data.Functor.Const
 import Data.Void (
     Void,
@@ -35,6 +36,10 @@ data Endianness
     | LittleEndian !Symbol
     deriving stock (Eq, Ord, Show)
     deriving stock (GHC.Generic)
+
+instance ToJSON Endianness where toJSON = error "Endianness"
+instance FromJSON Endianness where parseJSON = fail . show
+
 
 instance Hashable Endianness
 

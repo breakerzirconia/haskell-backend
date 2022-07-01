@@ -9,6 +9,7 @@ module Data.Sup (
     Sup (..),
 ) where
 
+import Data.Aeson
 import Data.Data (
     Data,
  )
@@ -33,6 +34,7 @@ data Sup a
     deriving stock (GHC.Generic)
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Eq a => Eq (Sup a) where
     (==) Sup = \case Sup -> True; _ -> False

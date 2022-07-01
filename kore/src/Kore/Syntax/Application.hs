@@ -19,6 +19,7 @@ module Kore.Syntax.Application (
     mapHead,
 ) where
 
+import Data.Aeson
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
 import Kore.Debug
@@ -40,6 +41,7 @@ data SymbolOrAlias = SymbolOrAlias
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse SymbolOrAlias where
     unparse
@@ -69,6 +71,7 @@ data Application head child = Application
     deriving stock (GHC.Generic)
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance (Debug head, Debug child) => Debug (Application head child)
 

@@ -16,6 +16,7 @@ import Control.Exception (
     Exception (..),
     throw,
  )
+import Data.Aeson
 import Debug
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
@@ -52,6 +53,9 @@ data Inj a = Inj
     deriving anyclass (NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+
+instance ToJSON (Inj a) where toJSON = error "Inj"
+instance FromJSON (Inj a) where parseJSON = fail . show
 
 instance Eq a => Eq (Inj a) where
     (==) a@(Inj _ _ _ _ _) b =

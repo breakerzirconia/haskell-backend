@@ -7,6 +7,7 @@ module Kore.Builtin.Signedness.Signedness (
     toApplication,
 ) where
 
+import Data.Aeson
 import Data.Functor.Const
 import Data.Void (
     Void,
@@ -38,6 +39,9 @@ data Signedness
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+
+instance ToJSON Signedness where toJSON = error "Signedness"
+instance FromJSON Signedness where parseJSON = fail . show
 
 instance Unparse Signedness where
     unparse = unparse . toApplication @Void

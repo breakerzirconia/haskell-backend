@@ -6,6 +6,7 @@ module Kore.Internal.InternalString (
     InternalString (..),
 ) where
 
+import Data.Aeson
 import Data.Functor.Const
 import Data.Text (
     Text,
@@ -36,6 +37,7 @@ data InternalString = InternalString
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse InternalString where
     unparse InternalString{internalStringSort, internalStringValue} =

@@ -6,6 +6,7 @@ module Kore.Syntax.Equals (
     Equals (..),
 ) where
 
+import Data.Aeson
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
 import Kore.Attribute.Pattern.FreeVariables
@@ -37,6 +38,7 @@ data Equals sort child = Equals
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Pretty child => Pretty (Equals Sort child) where
     pretty

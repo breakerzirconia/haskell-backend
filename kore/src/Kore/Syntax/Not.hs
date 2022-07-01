@@ -6,6 +6,7 @@ module Kore.Syntax.Not (
     Not (..),
 ) where
 
+import Data.Aeson
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
 import Kore.Attribute.Pattern.FreeVariables
@@ -31,6 +32,7 @@ data Not sort child = Not
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse child => Unparse (Not Sort child) where
     unparse Not{notSort, notChild} =

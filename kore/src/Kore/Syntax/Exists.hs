@@ -9,6 +9,7 @@ module Kore.Syntax.Exists (
 ) where
 
 import Control.Lens qualified as Lens
+import Data.Aeson
 import Data.Set (
     Set,
  )
@@ -43,6 +44,7 @@ data Exists sort variable child = Exists
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance
     (Unparse variable, Unparse child) =>

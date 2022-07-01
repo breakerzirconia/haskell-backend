@@ -6,6 +6,7 @@ module Kore.Syntax.Top (
     Top (..),
 ) where
 
+import Data.Aeson
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
 import Kore.Attribute.Pattern.FreeVariables
@@ -44,3 +45,7 @@ instance Synthetic (FreeVariables variable) (Top sort) where
 instance Synthetic Sort (Top Sort) where
     synthetic = topSort
     {-# INLINE synthetic #-}
+
+instance ToJSON sort => ToJSON (Top sort child) where
+  toEncoding = genericToEncoding defaultOptions
+instance FromJSON sort => FromJSON (Top sort child)

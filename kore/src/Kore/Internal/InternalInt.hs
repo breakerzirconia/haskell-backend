@@ -6,6 +6,7 @@ module Kore.Internal.InternalInt (
     InternalInt (..),
 ) where
 
+import Data.Aeson
 import Data.Functor.Const
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
@@ -29,6 +30,7 @@ data InternalInt = InternalInt {internalIntSort :: !Sort, internalIntValue :: !I
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse InternalInt where
     unparse InternalInt{internalIntSort, internalIntValue} =

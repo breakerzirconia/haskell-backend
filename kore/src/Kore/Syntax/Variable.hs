@@ -57,6 +57,7 @@ module Kore.Syntax.Variable (
     toConcrete,
 ) where
 
+import Data.Aeson
 import Data.Distributive (
     Distributive (..),
  )
@@ -151,6 +152,7 @@ data VariableName = VariableName
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 mkVariableName :: Id -> VariableName
 mkVariableName base = VariableName{base, counter = mempty}
@@ -175,6 +177,7 @@ newtype ElementVariableName variable = ElementVariableName {unElementVariableNam
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Semigroup a => Semigroup (ElementVariableName a) where
     (<>) a b = ElementVariableName (on (<>) unElementVariableName a b)
@@ -218,6 +221,7 @@ newtype SetVariableName variable = SetVariableName {unSetVariableName :: variabl
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Semigroup a => Semigroup (SetVariableName a) where
     (<>) a b = SetVariableName (on (<>) unSetVariableName a b)
@@ -266,6 +270,7 @@ data Variable variable = Variable
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse variable => Unparse (Variable variable) where
     unparse Variable{variableName, variableSort} =
@@ -345,6 +350,7 @@ data SomeVariableName variable
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse variable => Unparse (SomeVariableName variable) where
     unparse = unparseGeneric

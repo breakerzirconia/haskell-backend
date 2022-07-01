@@ -6,6 +6,7 @@ module Kore.Internal.InternalList (
     InternalList (..),
 ) where
 
+import Data.Aeson
 import Data.Sequence (
     Seq,
  )
@@ -42,6 +43,9 @@ data InternalList child = InternalList
     deriving stock (GHC.Generic)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+
+instance ToJSON (InternalList c) where toJSON = error "InternalList"
+instance FromJSON (InternalList c) where parseJSON = fail . show
 
 instance Hashable child => Hashable (InternalList child) where
     hashWithSalt salt internal =

@@ -9,6 +9,7 @@ module Kore.Syntax.Forall (
 ) where
 
 import Control.Lens qualified as Lens
+import Data.Aeson
 import Data.Set (Set)
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
@@ -41,6 +42,7 @@ data Forall sort variable child = Forall
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance (Unparse variable, Unparse child) => Unparse (Forall Sort variable child) where
     unparse Forall{forallSort, forallVariable, forallChild} =

@@ -6,6 +6,7 @@ module Kore.Syntax.Mu (
     Mu (..),
 ) where
 
+import Data.Aeson
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
 import Kore.Attribute.Pattern.FreeVariables
@@ -32,6 +33,7 @@ data Mu variable child = Mu
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance (Unparse variable, Unparse child) => Unparse (Mu variable child) where
     unparse Mu{muVariable, muChild} =

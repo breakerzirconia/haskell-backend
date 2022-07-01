@@ -13,6 +13,7 @@ module Kore.Internal.Alias (
 import Control.DeepSeq (
     deepseq,
  )
+import Data.Aeson
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
 import Kore.AST.AstWithLocation
@@ -41,6 +42,7 @@ data Alias patternType = Alias
     deriving anyclass (NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Eq patternType => Eq (Alias patternType) where
     (==) a b =

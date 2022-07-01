@@ -6,6 +6,7 @@ module Kore.Syntax.StringLiteral (
     StringLiteral (..),
 ) where
 
+import Data.Aeson
 import Data.Functor.Const
 import Data.Text (
     Text,
@@ -30,6 +31,7 @@ newtype StringLiteral = StringLiteral {getStringLiteral :: Text}
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse StringLiteral where
     unparse = Pretty.dquotes . Pretty.pretty . escapeStringT . getStringLiteral

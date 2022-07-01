@@ -6,6 +6,7 @@ module Kore.Syntax.Bottom (
     Bottom (..),
 ) where
 
+import Data.Aeson
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
 import Kore.Attribute.Pattern.FreeVariables
@@ -26,6 +27,7 @@ newtype Bottom sort child = Bottom {bottomSort :: sort}
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse (Bottom Sort child) where
     unparse Bottom{bottomSort} =

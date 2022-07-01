@@ -6,6 +6,7 @@ module Kore.Syntax.Next (
     Next (..),
 ) where
 
+import Data.Aeson
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
 import Kore.Attribute.Pattern.FreeVariables
@@ -30,6 +31,7 @@ data Next sort child = Next
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Unparse child => Unparse (Next Sort child) where
     unparse Next{nextSort, nextChild} =

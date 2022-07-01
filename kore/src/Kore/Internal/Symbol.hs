@@ -36,6 +36,7 @@ import Control.DeepSeq (
     deepseq,
  )
 import Control.Lens qualified as Lens
+import Data.Aeson
 import Data.Generics.Product
 import Data.Text (
     Text,
@@ -69,6 +70,9 @@ data Symbol = Symbol
     deriving anyclass (NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+
+instance ToJSON Symbol where toJSON = error "Symbol"
+instance FromJSON Symbol where parseJSON = fail . show
 
 instance Eq Symbol where
     (==) a b =

@@ -6,6 +6,7 @@ module Kore.Syntax.Or (
     Or (..),
 ) where
 
+import Data.Aeson
 import GHC.Generics qualified as GHC
 import Generics.SOP qualified as SOP
 import Kore.Attribute.Pattern.FreeVariables
@@ -34,6 +35,7 @@ data Or sort child = Or
     deriving anyclass (Hashable, NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug, Diff)
+    deriving anyclass (ToJSON, FromJSON)
 
 instance Pretty child => Pretty (Or Sort child) where
     pretty Or{orSort, orFirst, orSecond} =

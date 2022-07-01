@@ -18,6 +18,7 @@ module Kore.Syntax.Id (
     prettyPrintAstLocation,
 ) where
 
+import Data.Aeson
 import Data.String (
     IsString (..),
  )
@@ -45,6 +46,14 @@ data Id = Id
     deriving anyclass (NFData)
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug)
+
+-- | JSON codec omits the 'AstLocation'
+instance ToJSON Id where
+  toJSON Id{getId} = toJSON getId
+
+-- | parseJSON supplies 'AstLocationNone'
+instance FromJSON Id where
+  parseJSON = fmap (flip Id AstLocationNone) . parseJSON
 
 -- | 'Ord' ignores the 'AstLocation'
 instance Ord Id where
