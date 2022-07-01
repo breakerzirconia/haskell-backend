@@ -40,7 +40,6 @@ data Endianness
 instance ToJSON Endianness where toJSON = error "Endianness"
 instance FromJSON Endianness where parseJSON = fail . show
 
-
 instance Hashable Endianness
 
 instance NFData Endianness

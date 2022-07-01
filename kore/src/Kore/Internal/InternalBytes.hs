@@ -35,15 +35,17 @@ data InternalBytes = InternalBytes
     deriving anyclass (Debug, Diff)
 
 instance ToJSON InternalBytes where
-  toJSON InternalBytes{internalBytesSort, internalBytesValue} =
-    object [ "internalBytesSort" .= toJSON internalBytesSort
-           , "internalBytesValue" .= toJSON (ByteString.unpack internalBytesValue)
-           ]
+    toJSON InternalBytes{internalBytesSort, internalBytesValue} =
+        object
+            [ "internalBytesSort" .= toJSON internalBytesSort
+            , "internalBytesValue" .= toJSON (ByteString.unpack internalBytesValue)
+            ]
 
 instance FromJSON InternalBytes where
-  parseJSON = withObject "InternalBytes" $ \v -> InternalBytes
-    <$> v .: "internalBytesSort"
-    <*> fmap ByteString.pack (v .: "internalBytesValue")
+    parseJSON = withObject "InternalBytes" $ \v ->
+        InternalBytes
+            <$> v .: "internalBytesSort"
+            <*> fmap ByteString.pack (v .: "internalBytesValue")
 
 instance Unparse InternalBytes where
     unparse internalBytes@(InternalBytes _ _) =

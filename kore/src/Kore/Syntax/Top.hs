@@ -47,5 +47,5 @@ instance Synthetic Sort (Top Sort) where
     {-# INLINE synthetic #-}
 
 instance ToJSON sort => ToJSON (Top sort child) where
-  toEncoding = genericToEncoding defaultOptions
+    toEncoding = genericToEncoding defaultOptions
 instance FromJSON sort => FromJSON (Top sort child)

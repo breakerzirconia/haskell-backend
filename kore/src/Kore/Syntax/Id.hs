@@ -49,11 +49,11 @@ data Id = Id
 
 -- | JSON codec omits the 'AstLocation'
 instance ToJSON Id where
-  toJSON Id{getId} = toJSON getId
+    toJSON Id{getId} = toJSON getId
 
 -- | parseJSON supplies 'AstLocationNone'
 instance FromJSON Id where
-  parseJSON = fmap (flip Id AstLocationNone) . parseJSON
+    parseJSON = fmap (flip Id AstLocationNone) . parseJSON
 
 -- | 'Ord' ignores the 'AstLocation'
 instance Ord Id where

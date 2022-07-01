@@ -654,10 +654,8 @@ newtype TermLike variable = TermLike
     deriving anyclass (SOP.Generic, SOP.HasDatatypeInfo)
     deriving anyclass (Debug)
 
-
 instance ToJSON v => ToJSON (TermLike v) where toJSON = toJSON . tailF . getTermLike
 instance FromJSON v => FromJSON (TermLike v) where parseJSON = fail . show
-
 
 instance (Debug variable, Diff variable) => Diff (TermLike variable) where
     diffPrec

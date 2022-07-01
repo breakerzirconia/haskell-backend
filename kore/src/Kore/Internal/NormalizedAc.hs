@@ -38,7 +38,7 @@ import Control.Lens qualified as Lens
 import Control.Lens.Iso (
     Iso',
  )
-import Data.Aeson (ToJSON(..), FromJSON(..))
+import Data.Aeson (FromJSON (..), ToJSON (..))
 import Data.HashMap.Strict (
     HashMap,
  )
