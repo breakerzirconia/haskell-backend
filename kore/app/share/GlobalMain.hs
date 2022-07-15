@@ -569,7 +569,7 @@ execute options metadataTools lemmas worker =
     withZ3 =
         SMT.runWithSolver
             config
-            (declareSMTLemmas metadataTools lemmas)
+            (SMT.liftMSMT (declareSMTLemmas metadataTools lemmas))
             worker
     withoutSMT = SMT.runWithoutSolver worker
     KoreSolverOptions{timeOut, rLimit, resetInterval, prelude, solver} =

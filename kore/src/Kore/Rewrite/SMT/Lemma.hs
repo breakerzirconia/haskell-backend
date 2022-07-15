@@ -43,11 +43,9 @@ import Kore.Rewrite.SMT.Translate
 import Kore.Syntax.Sentence (
     SentenceAxiom (..),
  )
-import Log (
-    MonadLog (..),
- )
 import Prelude.Kore
 import SMT (
+    MSMT,
     MonadSMT (..),
     Result (..),
     SExpr (..),
@@ -67,14 +65,9 @@ getSMTLemmas m = map snd $ filter (isSmtLemma . Attribute.smtLemma . fst) $ inde
  the solver are inconsistent.
 -}
 declareSMTLemmas ::
-    forall m.
-    ( MonadIO m
-    , MonadSMT m
-    , MonadLog m
-    ) =>
     SmtMetadataTools StepperAttributes ->
     [SentenceAxiom (TermLike VariableName)] ->
-    m ()
+    MSMT ()
 declareSMTLemmas tools lemmas = do
     declareSortsSymbols $ smtData tools
     mapM_ declareRule lemmas
@@ -83,7 +76,7 @@ declareSMTLemmas tools lemmas = do
   where
     declareRule ::
         SentenceAxiom (TermLike VariableName) ->
-        m (Maybe ())
+        MSMT (Maybe ())
     declareRule axiomDeclaration = runMaybeT $ do
         oldAxiomEncoding <-
             sentenceAxiomPattern axiomDeclaration

@@ -243,9 +243,7 @@ translateTerm t (UninterpretedTerm pat) = do
         <|> declareUninterpreted t stateSetter boundPat boundVarsMap
 
 declareUninterpreted ::
-    ( MonadSMT m
-    , MonadLog m
-    , InternalVariable variable
+    ( InternalVariable variable
     , Ord termOrPredicate
     , Pretty termOrPredicate
     ) =>
@@ -255,7 +253,7 @@ declareUninterpreted ::
         (Map.Map termOrPredicate (SMTDependentAtom variable)) ->
     termOrPredicate ->
     Map.Map (ElementVariable variable) (SMTDependentAtom variable) ->
-    Translator variable m SExpr
+    Translator variable MSMT SExpr
 declareUninterpreted
     sExpr
     stateSetter
@@ -292,20 +290,19 @@ filterBoundVarsMap freeVars quantifiedVars =
         quantifiedVars
 
 lookupUninterpreted ::
-    (InternalVariable variable, MonadSMT m, Ord k) =>
+    (InternalVariable variable, Ord k) =>
     k ->
     Map.Map (ElementVariable variable) (SMTDependentAtom variable) ->
     Map.Map k (SMTDependentAtom variable) ->
-    Translator variable m SExpr
+    Translator variable MSMT SExpr
 lookupUninterpreted boundPat quantifiedVars terms =
     maybe empty (translateSMTDependentAtom quantifiedVars) $
         Map.lookup boundPat terms
 
 lookupVariable ::
     InternalVariable variable =>
-    Monad m =>
     TermLike.ElementVariable variable ->
-    Translator variable m SExpr
+    Translator variable MSMT SExpr
 lookupVariable var =
     lookupQuantifiedVariable <|> lookupFreeVariable
   where
@@ -319,13 +316,11 @@ lookupVariable var =
 
 declareVariable ::
     InternalVariable variable =>
-    SMT.MonadSMT m =>
-    MonadLog m =>
     -- | type name
     SExpr ->
     -- | variable to be declared
     TermLike.ElementVariable variable ->
-    Translator variable m SExpr
+    Translator variable MSMT SExpr
 declareVariable t variable = do
     n <- Counter.increment
     let varName = "<" <> Text.pack (show n) <> ">"

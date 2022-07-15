@@ -85,6 +85,7 @@ import Log (
  )
 import Prelude.Kore
 import SMT (
+    MSMT,
     SExpr (..),
  )
 import SMT qualified
@@ -386,10 +387,9 @@ currently existentially quantified.
 -}
 translateSMTDependentAtom ::
     InternalVariable variable =>
-    SMT.MonadSMT m =>
     Map.Map (ElementVariable variable) (SMTDependentAtom variable) ->
     SMTDependentAtom variable ->
-    Translator variable m SExpr
+    Translator variable MSMT SExpr
 translateSMTDependentAtom
     quantifiedVars
     SMTDependentAtom{smtName = funName, boundVars} =

@@ -29,14 +29,14 @@ import Kore.Rewrite.SMT.AST (
  )
 import Prelude.Kore
 import SMT (
-    MonadSMT,
+    MSMT,
     declareDatatypes,
     declareFun_,
     declareSort,
  )
 
 -- | Sends all symbols in the given declarations to the SMT.
-declareSymbols :: MonadSMT m => SmtDeclarations -> m ()
+declareSymbols :: SmtDeclarations -> MSMT ()
 declareSymbols = traverse_ (declareSymbol . symbolDeclaration) . symbols
   where
     declareSymbol = \case
@@ -45,7 +45,7 @@ declareSymbols = traverse_ (declareSymbol . symbolDeclaration) . symbols
         SymbolConstructor _ -> return ()
 
 -- | Sends all sorts in the given declarations to the SMT.
-declareSorts :: MonadSMT m => SmtDeclarations -> m ()
+declareSorts :: SmtDeclarations -> MSMT ()
 declareSorts Declarations{sorts} = do
     let (sortDecls, dataTypeDecls) =
             elems sorts
@@ -60,5 +60,5 @@ declareSorts Declarations{sorts} = do
         SortDeclaredIndirectly _ -> Nothing
 
 -- | Sends all given declarations to the SMT
-declareSortsSymbols :: MonadSMT m => SmtDeclarations -> m ()
+declareSortsSymbols :: SmtDeclarations -> MSMT ()
 declareSortsSymbols decls = declareSorts decls >> declareSymbols decls

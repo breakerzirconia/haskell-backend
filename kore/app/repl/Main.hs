@@ -240,7 +240,8 @@ mainWithOptions LocalOptions{execOptions, simplifierx} = do
 
                         SMT.runWithSolver
                             smtConfig
-                            ( declareSMTLemmas
+                            ( SMT.liftMSMT $
+                              declareSMTLemmas
                                 (MetadataTools.build validatedDefinition)
                                 (getSMTLemmas validatedDefinition)
                             )
