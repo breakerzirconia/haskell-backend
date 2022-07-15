@@ -12,9 +12,6 @@ module Test.Kore.Exec (
 ) where
 
 import Control.Exception as Exception
-import Control.Monad.Catch (
-    MonadMask,
- )
 import Data.Default (
     def,
  )
@@ -89,10 +86,7 @@ import Kore.Rewrite.Search qualified as Search
 import Kore.Rewrite.Strategy (
     LimitExceeded (..),
  )
-import Kore.Simplify.Data (
-    MonadProf,
- )
-import Kore.Simplify.Simplify (MonadSMT, SimplifierXSwitch (..))
+import Kore.Simplify.Simplify (SimplifierXSwitch (..))
 import Kore.Syntax.Definition hiding (
     Alias,
     Symbol,
@@ -107,7 +101,6 @@ import Kore.Validate.DefinitionVerifier (
 import Kore.Verified qualified as Verified
 import Log (
     Entry (..),
-    MonadLog (..),
  )
 import Prelude.Kore
 import SMT qualified
@@ -1032,17 +1025,12 @@ test_execGetExitCode =
 -- disabled; this change should be made when we add the first
 -- experimental feature;
 execTest ::
-    MonadIO smt =>
-    MonadLog smt =>
-    MonadSMT smt =>
-    MonadMask smt =>
-    MonadProf smt =>
     Limit Natural ->
     Limit Natural ->
     VerifiedModule Attribute.StepperAttributes ->
     ExecutionMode ->
     TermLike VariableName ->
-    smt (ExitCode, TermLike VariableName)
+    SMT.MSMT (ExitCode, TermLike VariableName)
 execTest depthLimit breadthLimit verifiedModule strategy initial = do
     serializedModule <- makeSerializedModule DisabledSimplifierX verifiedModule
     exec
@@ -1054,18 +1042,13 @@ execTest depthLimit breadthLimit verifiedModule strategy initial = do
         initial
 
 searchTest ::
-    MonadIO smt =>
-    MonadLog smt =>
-    MonadSMT smt =>
-    MonadMask smt =>
-    MonadProf smt =>
     Limit Natural ->
     Limit Natural ->
     VerifiedModule Attribute.StepperAttributes ->
     TermLike VariableName ->
     Pattern VariableName ->
     Search.Config ->
-    smt (TermLike VariableName)
+    SMT.MSMT (TermLike VariableName)
 searchTest depthLimit breadthLimit verifiedModule initial currentSearchPattern config = do
     serializedModule <- makeSerializedModule DisabledSimplifierX verifiedModule
     search
@@ -1078,23 +1061,13 @@ searchTest depthLimit breadthLimit verifiedModule initial currentSearchPattern c
         config
 
 matchDisjunctionTest ::
-    MonadLog smt =>
-    MonadSMT smt =>
-    MonadIO smt =>
-    MonadMask smt =>
-    MonadProf smt =>
     VerifiedModule Attribute.Symbol ->
     Pattern RewritingVariableName ->
     [Pattern RewritingVariableName] ->
-    smt (TermLike VariableName)
+    SMT.MSMT (TermLike VariableName)
 matchDisjunctionTest = matchDisjunction DisabledSimplifierX
 
 checkFunctionsTest ::
-    MonadLog smt =>
-    MonadSMT smt =>
-    MonadIO smt =>
-    MonadMask smt =>
-    MonadProf smt =>
     VerifiedModule Attribute.StepperAttributes ->
-    smt ()
+    SMT.MSMT ()
 checkFunctionsTest = checkFunctions DisabledSimplifierX
