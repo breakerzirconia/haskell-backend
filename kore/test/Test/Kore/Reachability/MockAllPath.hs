@@ -395,6 +395,7 @@ instance MonadLog AllPathIdentity where
     logWhile _ = undefined
 
 instance MonadSMT AllPathIdentity where
+    liftMSMT = undefined
     withSolver = undefined
     declare = undefined
     declareFun = undefined

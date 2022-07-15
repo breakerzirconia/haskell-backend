@@ -367,10 +367,9 @@ test_sortDeclaration =
     testsForModule name = Helpers.testsForModule name declareSymbolsAndSorts
 
     declareSymbolsAndSorts ::
-        SMT.MonadSMT m =>
         SmtMetadataTools Attribute.Symbol ->
         VerifiedModule Attribute.Symbol ->
-        m ()
+        SMT.MSMT ()
     declareSymbolsAndSorts _tools m =
         declareSortsSymbols
             (Representation.build m (Attribute.Constructors.indexBySort m))

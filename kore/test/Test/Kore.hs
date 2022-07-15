@@ -35,6 +35,7 @@ module Test.Kore (
     korePatternUnifiedGen,
     TestLog (..),
     runTestLog,
+    runTestLogMSMT,
 
     -- * Re-exports
     ParsedPattern,
@@ -54,6 +55,7 @@ import Control.Monad.State.Strict (
 import Control.Monad.State.Strict qualified as State
 import Data.Bifunctor qualified as Bifunctor
 import Data.Functor.Const
+import Data.IORef
 import Data.Text (
     Text,
  )
@@ -86,6 +88,7 @@ import Kore.Log qualified as Log (
     Entry (toEntry),
     MonadLog (..),
     emptyLogger,
+    runLoggerT,
     toEntry,
  )
 import Kore.Parser (
@@ -108,9 +111,13 @@ import Kore.Variables.Target (
     mkSetNonTarget,
     mkSetTarget,
  )
-import Log (SomeEntry)
+import Log (LogAction (..), SomeEntry, actualEntry)
 import Prelude.Kore
 import Prof (MonadProf)
+import SMT (
+    MSMT,
+    runWithoutSolver
+ )
 
 -- | @Context@ stores the variables and sort variables in scope.
 data Context = Context
@@ -810,3 +817,13 @@ runTestLog ::
     TestLog m a ->
     IO (a, [SomeEntry])
 runTestLog run (TestLog state) = run $ State.runStateT state []
+
+runTestLogMSMT ::
+    MSMT a -> IO (a, [SomeEntry])
+runTestLogMSMT action = do
+    entriesRef <- newIORef []
+    let logAction = LogAction $ \entry ->
+            atomicModifyIORef' entriesRef (\entries -> (Log.actualEntry entry : entries, ()))
+    r <- Log.runLoggerT (runWithoutSolver action) logAction
+    entries <- readIORef entriesRef
+    return (r, entries)

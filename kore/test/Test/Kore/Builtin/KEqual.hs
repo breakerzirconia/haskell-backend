@@ -37,7 +37,7 @@ import Kore.Unification.UnifierT (
  )
 import Prelude.Kore
 import SMT (
-    NoSMT,
+    MSMT,
  )
 import Test.Kore (
     testId,
@@ -229,7 +229,7 @@ dvX =
 runKEqualSimplification ::
     TermLike RewritingVariableName ->
     TermLike RewritingVariableName ->
-    NoSMT [Maybe (Pattern RewritingVariableName)]
+    MSMT [Maybe (Pattern RewritingVariableName)]
 runKEqualSimplification term1 term2 =
     unify matched
         & runMaybeT

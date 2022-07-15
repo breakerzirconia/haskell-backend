@@ -35,7 +35,7 @@ import Kore.Rewrite.SMT.Evaluator qualified as SMT.Evaluator
 import Kore.Simplify.Data qualified as Kore
 import Prelude.Kore
 import SMT (
-    SMT,
+    MSMT,
  )
 import Test.Kore
 import Test.Kore.Builtin.Bool qualified as Builtin.Bool
@@ -207,7 +207,7 @@ test_andNegation =
 
 evaluateSMT ::
     Predicate VariableName ->
-    PropertyT SMT (Maybe Bool)
+    PropertyT MSMT (Maybe Bool)
 evaluateSMT =
     lift
         . Kore.runSimplifier testEnv
