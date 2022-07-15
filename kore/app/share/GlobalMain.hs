@@ -47,9 +47,6 @@ import Control.Lens (
  )
 import Control.Lens qualified as Lens
 import Control.Monad qualified as Monad
-import Control.Monad.Catch (
-    MonadMask,
- )
 import Data.Binary qualified as Binary
 import Data.ByteString.Lazy qualified as ByteString
 import Data.Compact (
@@ -189,11 +186,8 @@ import Paths_kore qualified as MetaData (
  )
 import Prelude.Kore
 import Pretty qualified as KorePretty
-import Prof (
-    MonadProf,
- )
 import SMT (
-    MonadSMT,
+    MSMT,
  )
 import SMT qualified
 import System.Clock (
@@ -556,14 +550,6 @@ mainParse parser fileName = do
         Left err -> errorParse err
         Right definition -> return definition
 
-type MonadExecute exe =
-    ( MonadMask exe
-    , MonadIO exe
-    , MonadSMT exe
-    , MonadProf exe
-    , WithLog LogMessage exe
-    )
-
 -- | Run the worker in the context of the main module.
 execute ::
     forall r.
@@ -572,7 +558,7 @@ execute ::
     SmtMetadataTools StepperAttributes ->
     [SentenceAxiom (TermLike VariableName)] ->
     -- | Worker
-    (forall exe. MonadExecute exe => exe r) ->
+    MSMT r ->
     Main r
 execute options metadataTools lemmas worker =
     clockSomethingIO "Executing" $
@@ -581,11 +567,11 @@ execute options metadataTools lemmas worker =
             None -> withoutSMT
   where
     withZ3 =
-        SMT.runSMT
+        SMT.runWithSolver
             config
             (declareSMTLemmas metadataTools lemmas)
             worker
-    withoutSMT = SMT.runNoSMT worker
+    withoutSMT = SMT.runWithoutSolver worker
     KoreSolverOptions{timeOut, rLimit, resetInterval, prelude, solver} =
         options
     config =

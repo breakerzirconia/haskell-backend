@@ -11,6 +11,9 @@ module SMT (
     Solver,
     stopSolver,
     runSMT,
+    MSMT,
+    runWithoutSolver,
+    runWithSolver,
     MonadSMT (..),
     Config (..),
     defaultConfig,
@@ -30,8 +33,6 @@ module SMT (
     declareFun_,
     setInfo,
     setOption,
-    NoSMT (..),
-    runNoSMT,
     SimpleSMT.SolverException (..),
 
     -- * Expressions
@@ -76,7 +77,7 @@ import Control.Monad.RWS.Strict (
     RWST,
  )
 import Control.Monad.Reader (
-    ReaderT,
+    ReaderT(ReaderT),
     runReaderT,
  )
 import Control.Monad.Reader qualified as Reader
@@ -237,39 +238,6 @@ class Monad m => MonadSMT m where
         m ()
     reinit = Trans.lift reinit
     {-# INLINE reinit #-}
-
--- * Dummy implementation
-
-newtype NoSMT a = NoSMT {getNoSMT :: LoggerT IO a}
-    deriving newtype (Functor, Applicative, Monad, MonadIO)
-    deriving newtype (MonadCatch, MonadThrow, MonadMask)
-
-runNoSMT :: NoSMT a -> LoggerT IO a
-runNoSMT = getNoSMT
-
-instance MonadProf NoSMT where
-    traceEvent name = NoSMT (traceEvent name)
-    {-# INLINE traceEvent #-}
-
-instance MonadLog NoSMT where
-    logEntry entry = NoSMT $ logEntry entry
-    {-# INLINE logEntry #-}
-
-    logWhile entry2 action = NoSMT $ logWhile entry2 $ getNoSMT action
-    {-# INLINE logWhile #-}
-
-instance MonadSMT NoSMT where
-    withSolver = id
-    declare name _ = return (Atom name)
-    declareFun FunctionDeclaration{name} = return name
-    declareSort SortDeclaration{name} = return name
-    declareDatatype _ = return ()
-    declareDatatypes _ = return ()
-    loadFile _ = return ()
-    ackCommand _ = return ()
-    assert _ = return ()
-    check = return Unknown
-    reinit = return ()
 
 -- * Implementation
 
@@ -621,6 +589,51 @@ setInfo infoFlag expr =
 setOption :: MonadSMT m => Text -> SExpr -> m ()
 setOption infoFlag expr =
     ackCommand $ List (Atom "set-option" : Atom infoFlag : [expr])
+
+-- --------------------------------
+-- Maybe SMT. Maybe not.
+
+newtype MSMT a = MSMT {getMSMT :: ReaderT (Maybe SolverSetup) (LoggerT IO) a}
+    deriving newtype (Applicative, Functor, Monad)
+    deriving newtype (MonadIO, MonadLog)
+    deriving newtype (MonadCatch, MonadThrow, MonadMask)
+
+instance MonadProf MSMT where
+    traceEvent name = MSMT (traceEvent name)
+
+toMSMT :: LoggerT IO a -> SMT a -> MSMT a
+toMSMT defaultAction (SMT (ReaderT action)) = do
+    MSMT $ ReaderT $ \mSolverSetup ->
+        case mSolverSetup of
+          Nothing -> defaultAction
+          Just solverSetup -> action solverSetup
+
+fromMSMT :: MSMT a -> SMT a
+fromMSMT (MSMT (ReaderT action)) =
+    SMT $ ReaderT $ \solverSetup ->
+        action (Just solverSetup)
+
+runWithoutSolver :: MSMT a -> LoggerT IO a
+runWithoutSolver action = runReaderT (getMSMT action) Nothing
+
+runWithSolver :: Config -> SMT () -> MSMT a -> LoggerT IO a
+runWithSolver config userInit action = runSMT config userInit (fromMSMT action)
+
+instance MonadSMT MSMT where
+    withSolver action =
+        toMSMT (runWithoutSolver action) (withSolver (fromMSMT action))
+    declare name typ = toMSMT (return (Atom name)) (declare name typ)
+    declareFun declaration@FunctionDeclaration{name} =
+        toMSMT (return name) (declareFun declaration)
+    declareSort declaration@SortDeclaration{name} =
+        toMSMT (return name) (declareSort declaration)
+    declareDatatype declaration = toMSMT (return ()) (declareDatatype declaration)
+    declareDatatypes datatypes = toMSMT (return ()) (declareDatatypes datatypes)
+    assert fact = toMSMT (return ()) (assert fact)
+    check = toMSMT (return Unknown) check
+    ackCommand command = toMSMT (return ()) (ackCommand command)
+    loadFile path = toMSMT (return ()) (loadFile path)
+    reinit = toMSMT (return ()) reinit
 
 -- --------------------------------
 -- Internal
