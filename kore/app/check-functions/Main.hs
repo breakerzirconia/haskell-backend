@@ -57,7 +57,7 @@ import Kore.Syntax.Module (
 import Prelude.Kore
 import SMT (
     defaultConfig,
-    runSMT,
+    runWithSolver,
  )
 import System.Clock (
     Clock (Monotonic),
@@ -141,7 +141,7 @@ koreCheckFunctions LocalOptions{execOptions, simplifierx} tmpDir =
         definitions <- loadDefinitions [fileName]
         loadedModule <- loadModule mainModuleName definitions
         checkFunctions simplifierx loadedModule
-            & SMT.runSMT defaultConfig (pure ())
+            & SMT.runWithSolver defaultConfig (pure ())
         return ExitSuccess
         & handle handleSomeException
         & runKoreLog tmpDir koreLogOptions

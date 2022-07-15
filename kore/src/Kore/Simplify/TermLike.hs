@@ -7,9 +7,6 @@ module Kore.Simplify.TermLike (
 ) where
 
 import Control.Lens.Combinators qualified as Lens
-import Control.Monad.Catch (
-    MonadThrow,
- )
 import Data.Functor.Const
 import Data.Functor.Foldable qualified as Recursive
 import Kore.Attribute.Pattern.FreeVariables (
@@ -102,7 +99,7 @@ import Kore.Simplify.Nu qualified as Nu (
 import Kore.Simplify.Or qualified as Or (
     simplify,
  )
-import Kore.Simplify.Simplify
+import {-# SOURCE #-} Kore.Simplify.Data (Simplifier)
 import Kore.Simplify.StringLiteral qualified as StringLiteral (
     simplify,
  )
@@ -125,18 +122,15 @@ import Prelude.Kore
 
 -- | Simplify the given 'TermLike'. Do not simplify any side conditions.
 simplify ::
-    forall simplifier.
-    MonadSimplify simplifier =>
-    MonadThrow simplifier =>
     SideCondition RewritingVariableName ->
     TermLike RewritingVariableName ->
-    simplifier (OrPattern RewritingVariableName)
+    Simplifier (OrPattern RewritingVariableName)
 simplify sideCondition =
     loop . OrPattern.fromTermLike
   where
     loop ::
         OrPattern RewritingVariableName ->
-        simplifier (OrPattern RewritingVariableName)
+        Simplifier (OrPattern RewritingVariableName)
     loop input = do
         output <- MultiOr.traverseOr (propagateConditions worker) input
         if input == output
@@ -155,7 +149,7 @@ simplify sideCondition =
 
     worker ::
         TermLike RewritingVariableName ->
-        simplifier (OrPattern RewritingVariableName)
+        Simplifier (OrPattern RewritingVariableName)
     worker termLike
         | Just termLike' <- replaceTerm termLike =
             worker termLike'

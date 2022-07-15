@@ -10,11 +10,9 @@ Stability   : experimental
 Portability : portable
 -}
 module Kore.Simplify.Data (
-    Simplifier,
     TermSimplifier,
-    SimplifierT,
-    runSimplifierT,
     Env (..),
+    Simplifier,
     runSimplifier,
     runSimplifierBranch,
     evalSimplifier,
@@ -31,7 +29,6 @@ import Control.Monad.Catch (
     MonadMask,
     MonadThrow,
  )
-import Control.Monad.Morph qualified as Morph
 import Control.Monad.Reader
 import Control.Monad.State.Strict
 import Data.Map.Strict (
@@ -85,13 +82,12 @@ import Kore.Simplify.TermLike qualified as TermLike
 import Kore.Syntax.Variable (
     VariableName,
  )
-import Log
 import Logic
 import Prelude.Kore
 import Pretty qualified
 import Prof
 import SMT (
-    SMT (..),
+    MSMT
  )
 
 -- * Simplifier
@@ -112,26 +108,13 @@ A @Simplifier@ can send constraints to the SMT solver through 'MonadSMT'.
 
 A @Simplifier@ can write to the log through 'HasLog'.
 -}
-newtype SimplifierT smt a = SimplifierT
-    { runSimplifierT :: StateT SimplifierCache (ReaderT (Env (SimplifierT smt)) smt) a
+newtype Simplifier a = Simplifier
+    { runSimplifier' :: StateT SimplifierCache (ReaderT (Env Simplifier) MSMT) a
     }
-    deriving newtype (Functor, Applicative, Monad, MonadSMT)
+    deriving newtype (Functor, Applicative, Monad, MonadSMT, MonadLog, MonadProf)
     deriving newtype (MonadIO, MonadCatch, MonadThrow, MonadMask)
-    deriving newtype (MonadReader (Env (SimplifierT smt)))
+    deriving newtype (MonadReader (Env Simplifier))
     deriving newtype (MonadState SimplifierCache)
-
-type Simplifier = SimplifierT SMT
-
-instance MonadTrans SimplifierT where
-    lift smt = SimplifierT ((lift . lift) smt)
-    {-# INLINE lift #-}
-
-instance MonadLog log => MonadLog (SimplifierT log) where
-    logWhile entry = mapSimplifierT $ logWhile entry
-
-instance (MonadMask prof, MonadProf prof) => MonadProf (SimplifierT prof) where
-    traceEvent name = lift (traceEvent name)
-    {-# INLINE traceEvent #-}
 
 traceProfSimplify ::
     MonadProf prof =>
@@ -148,10 +131,7 @@ traceProfSimplify (Pattern.toTermLike -> termLike) =
             . Pretty.pretty
             <$> matchAxiomIdentifier termLike
 
-instance
-    (MonadSMT m, MonadLog m, MonadMask m, MonadProf m) =>
-    MonadSimplify (SimplifierT m)
-    where
+instance MonadSimplify Simplifier where
     askMetadataTools = asks metadataTools
     {-# INLINE askMetadataTools #-}
 
@@ -195,11 +175,10 @@ instance
 
 -- | Run a simplification, returning the results along all branches.
 runSimplifierBranch ::
-    Monad smt =>
-    Env (SimplifierT smt) ->
+    Env Simplifier ->
     -- | simplifier computation
-    LogicT (SimplifierT smt) a ->
-    smt [a]
+    LogicT Simplifier a ->
+    MSMT [a]
 runSimplifierBranch env = runSimplifier env . observeAllT
 
 {- | Run a simplification, returning the result of only one branch.
@@ -208,20 +187,18 @@ __Warning__: @runSimplifier@ calls 'error' if the 'Simplifier' does not contain
 exactly one branch. Use 'evalSimplifierBranch' to evaluation simplifications
 that may branch.
 -}
-runSimplifier :: Monad smt => Env (SimplifierT smt) -> SimplifierT smt a -> smt a
+runSimplifier :: Env Simplifier -> Simplifier a -> MSMT a
 runSimplifier env simplifier =
-    runReaderT (evalStateT (runSimplifierT simplifier) initCache) env
+    runReaderT (evalStateT (runSimplifier' simplifier) initCache) env
 
 mkSimplifierEnv ::
-    forall smt.
-    (MonadLog smt, MonadSMT smt, MonadMask smt, MonadProf smt, MonadIO smt) =>
     SimplifierXSwitch ->
     VerifiedModuleSyntax Attribute.Symbol ->
     SortGraph ->
     OverloadGraph ->
     SmtMetadataTools Attribute.Symbol ->
     Map AxiomIdentifier [Equation VariableName] ->
-    smt (Env (SimplifierT smt))
+    MSMT (Env Simplifier)
 mkSimplifierEnv simplifierXSwitch verifiedModule sortGraph overloadGraph metadataTools rawEquations =
     runSimplifier earlyEnv initialize
   where
@@ -257,7 +234,7 @@ mkSimplifierEnv simplifierXSwitch verifiedModule sortGraph overloadGraph metadat
         {-# SCC "evalSimplifier/overloadSimplifier" #-}
         mkOverloadSimplifier overloadGraph injSimplifier
 
-    initialize :: SimplifierT smt (Env (SimplifierT smt))
+    initialize :: Simplifier (Env Simplifier)
     initialize = do
         equations <-
             Equation.simplifyExtractedEquations $
@@ -296,27 +273,25 @@ exactly one branch. Use 'evalSimplifierBranch' to evaluation simplifications
 that may branch.
 -}
 evalSimplifier ::
-    forall smt a.
-    (MonadLog smt, MonadSMT smt, MonadMask smt, MonadProf smt, MonadIO smt) =>
+    forall a.
     SimplifierXSwitch ->
     VerifiedModuleSyntax Attribute.Symbol ->
     SortGraph ->
     OverloadGraph ->
     SmtMetadataTools Attribute.Symbol ->
     Map AxiomIdentifier [Equation VariableName] ->
-    SimplifierT smt a ->
-    smt a
+    Simplifier a ->
+    MSMT a
 evalSimplifier simplifierXSwitch verifiedModule sortGraph overloadGraph metadataTools rawEquations simplifier = do
     env <- mkSimplifierEnv simplifierXSwitch verifiedModule sortGraph overloadGraph metadataTools rawEquations
     runSimplifier env simplifier
 
 evalSimplifierProofs ::
-    forall smt a.
-    (MonadLog smt, MonadSMT smt, MonadMask smt, MonadProf smt, MonadIO smt) =>
+    forall a.
     SimplifierXSwitch ->
     VerifiedModule Attribute.Symbol ->
-    SimplifierT smt a ->
-    smt a
+    Simplifier a ->
+    MSMT a
 evalSimplifierProofs simplifierXSwitch verifiedModule simplifier =
     evalSimplifier simplifierXSwitch (indexedModuleSyntax verifiedModule) sortGraph overloadGraph metadataTools rawEquations simplifier
   where
@@ -337,13 +312,3 @@ evalSimplifierProofs simplifierXSwitch verifiedModule simplifier =
         OverloadGraph.fromIndexedModule verifiedModule
     metadataTools = MetadataTools.build verifiedModule'
     rawEquations = Equation.extractEquations verifiedModule'
-
-mapSimplifierT ::
-    forall m b.
-    Monad m =>
-    (forall a. m a -> m a) ->
-    SimplifierT m b ->
-    SimplifierT m b
-mapSimplifierT f simplifierT =
-    SimplifierT . StateT $ \s ->
-        Morph.hoist f (runStateT (runSimplifierT simplifierT) s)
