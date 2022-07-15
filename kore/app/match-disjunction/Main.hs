@@ -45,7 +45,7 @@ import Options.Applicative (
  )
 import Prelude.Kore
 import Pretty
-import SMT (runNoSMT)
+import SMT (runWithoutSolver)
 import System.Clock (
     Clock (..),
     TimeSpec,
@@ -152,7 +152,7 @@ koreMatchDisjunction LocalOptions{execOptions, simplifierx} = do
         mainParseDisjunctionPattern mainModule disjunctionFileName
     final <-
         clockSomethingIO "Executing" $
-            runNoSMT $
+            runWithoutSolver $
                 matchDisjunction
                     simplifierx
                     mainModule
