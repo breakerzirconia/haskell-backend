@@ -178,7 +178,7 @@ test_execDepthLimitExceeded = testCase "exec exceeds depth limit" $
             verifiedModule
             Any
             inputPattern
-            & runTestLoggerT . SMT.runNoSMT
+            & runTestLoggerT . SMT.runWithoutSolver
     verifiedModule =
         verifiedMyModule
             Module
@@ -325,7 +325,7 @@ test_checkFunctions =
                             }
             actual <-
                 checkFunctionsTest verifiedModule
-                    & runTestLoggerT . SMT.runNoSMT
+                    & runTestLoggerT . SMT.runWithoutSolver
                     & try @ErrorEquationRightFunction
             assertEqual "" True $ isRight actual
         , testCase "Not every equation RHS is a function pattern." $ do
@@ -344,7 +344,7 @@ test_checkFunctions =
                             }
             actual <-
                 checkFunctionsTest verifiedModule
-                    & runTestLoggerT . SMT.runNoSMT
+                    & runTestLoggerT . SMT.runWithoutSolver
                     & try @ErrorEquationRightFunction
             assertEqual "" True $ isLeft actual
         , testCase "Test RHS ignore simplification equations." $ do
@@ -361,7 +361,7 @@ test_checkFunctions =
                             }
             actual <-
                 checkFunctionsTest verifiedModule
-                    & runTestLoggerT . SMT.runNoSMT
+                    & runTestLoggerT . SMT.runWithoutSolver
                     & try @ErrorEquationRightFunction
             assertEqual "" True $ isRight actual
         , testCase "Function patterns do not both match." $ do
@@ -380,7 +380,7 @@ test_checkFunctions =
                             }
             actual <-
                 checkFunctionsTest verifiedModule
-                    & runTestLoggerT . SMT.runNoSMT
+                    & runTestLoggerT . SMT.runWithoutSolver
                     & try @ErrorEquationsSameMatch
             assertEqual "" True $ isRight actual
         , testCase "Two function patterns both match." $ do
@@ -400,7 +400,7 @@ test_checkFunctions =
                             }
             actual <-
                 checkFunctionsTest verifiedModule
-                    & runTestLoggerT . SMT.runNoSMT
+                    & runTestLoggerT . SMT.runWithoutSolver
                     & try @ErrorEquationsSameMatch
             assertEqual "" True $ isLeft actual
         , testCase "Test both match ignore simplification equations." $ do
@@ -420,7 +420,7 @@ test_checkFunctions =
                             }
             actual <-
                 checkFunctionsTest verifiedModule
-                    & runTestLoggerT . SMT.runNoSMT
+                    & runTestLoggerT . SMT.runWithoutSolver
                     & try @ErrorEquationsSameMatch
             assertEqual "" True $ isRight actual
         ]
@@ -554,7 +554,7 @@ test_execBottom = testCase "exec returns bottom on unsatisfiable input patterns.
             verifiedModule
             Any
             inputPattern
-            & runTestLoggerT . SMT.runNoSMT
+            & runTestLoggerT . SMT.runWithoutSolver
     verifiedModule =
         verifiedMyModule
             Module

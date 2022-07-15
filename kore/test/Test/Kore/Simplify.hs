@@ -13,7 +13,7 @@ module Test.Kore.Simplify (
     -- * Re-exports
     Simplifier,
     SimplifierT,
-    NoSMT,
+    MSMT,
     Env (..),
     Kore.MonadSimplify,
 ) where
@@ -73,22 +73,22 @@ import Logic (
  )
 import Prelude.Kore
 import SMT (
-    NoSMT,
+    MSMT,
  )
 import Test.Kore.Rewrite.MockSymbols qualified as Mock
 import Test.SMT qualified as Test
 
-runSimplifierSMT :: Env Simplifier -> Simplifier a -> IO a
+runSimplifierSMT :: Env (SimplifierT MSMT) -> SimplifierT MSMT a -> IO a
 runSimplifierSMT env = Test.runSMT userInit . Kore.runSimplifier env
   where
     userInit = declareSortsSymbols Mock.smtDeclarations
 
-runSimplifier :: Env (SimplifierT NoSMT) -> SimplifierT NoSMT a -> IO a
+runSimplifier :: Env (SimplifierT MSMT) -> SimplifierT MSMT a -> IO a
 runSimplifier env = Test.runNoSMT . Kore.runSimplifier env
 
 runSimplifierBranch ::
-    Env (SimplifierT NoSMT) ->
-    LogicT (SimplifierT NoSMT) a ->
+    Env (SimplifierT MSMT) ->
+    LogicT (SimplifierT MSMT) a ->
     IO [a]
 runSimplifierBranch env = Test.runNoSMT . Kore.runSimplifierBranch env
 

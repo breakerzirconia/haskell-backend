@@ -58,6 +58,7 @@ import Numeric.Natural (
 import Prelude.Kore
 import SMT (
     Config (..),
+    MSMT,
     SMT,
     TimeOut (..),
     defaultConfig,
@@ -104,7 +105,7 @@ eq = SMT.eq
 
 isSatisfiable ::
     HasCallStack =>
-    [SMT ()] ->
+    [MSMT ()] ->
     SmtMetadataTools Attribute.Symbol ->
     SmtPrelude ->
     TestTree
@@ -112,7 +113,7 @@ isSatisfiable tests _ = assertSmtTestCase "isSatisfiable" SMT.Sat tests
 
 isSatisfiableWithTools ::
     HasCallStack =>
-    [SmtMetadataTools Attribute.Symbol -> SMT ()] ->
+    [SmtMetadataTools Attribute.Symbol -> MSMT ()] ->
     SmtMetadataTools Attribute.Symbol ->
     SmtPrelude ->
     TestTree
@@ -125,7 +126,7 @@ isSatisfiableWithTools tests tools prelude =
 
 isNotSatisfiable ::
     HasCallStack =>
-    [SMT ()] ->
+    [MSMT ()] ->
     SmtMetadataTools Attribute.Symbol ->
     SmtPrelude ->
     TestTree
@@ -133,7 +134,7 @@ isNotSatisfiable tests _ = assertSmtTestCase "isNotSatisfiable" SMT.Unsat tests
 
 isNotSatisfiableWithTools ::
     HasCallStack =>
-    [SmtMetadataTools Attribute.Symbol -> SMT ()] ->
+    [SmtMetadataTools Attribute.Symbol -> MSMT ()] ->
     SmtMetadataTools Attribute.Symbol ->
     SmtPrelude ->
     TestTree
@@ -146,7 +147,7 @@ isNotSatisfiableWithTools tests tools prelude =
 
 isError ::
     HasCallStack =>
-    [SMT ()] ->
+    [MSMT ()] ->
     SmtMetadataTools Attribute.Symbol ->
     SmtPrelude ->
     TestTree
@@ -167,14 +168,14 @@ isError actions _ prelude =
         return ()
 
 getSmtResult ::
-    [SMT ()] ->
+    [MSMT ()] ->
     SmtPrelude ->
     IO SMT.Result
 getSmtResult
     actions
     SmtPrelude{getSmtPrelude = preludeAction} =
         do
-            let smtResult :: SMT SMT.Result
+            let smtResult :: MSMT SMT.Result
                 smtResult = do
                     sequence_ actions
                     SMT.check
@@ -186,7 +187,7 @@ getSmtResult
 assertSmtResult ::
     HasCallStack =>
     SMT.Result ->
-    [SMT ()] ->
+    [MSMT ()] ->
     SmtPrelude ->
     Assertion
 assertSmtResult expected actions prelude = do
@@ -197,7 +198,7 @@ assertSmtTestCase ::
     HasCallStack =>
     String ->
     SMT.Result ->
-    [SMT ()] ->
+    [MSMT ()] ->
     SmtPrelude ->
     TestTree
 assertSmtTestCase name expected actions prelude =

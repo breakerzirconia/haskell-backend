@@ -15,7 +15,7 @@ import Log (
  )
 import Prelude.Kore
 import SMT (
-    NoSMT,
+    MSMT,
     SMT,
  )
 import SMT qualified
@@ -26,7 +26,7 @@ import Test.Tasty.Hedgehog
 testPropertyWithSolver ::
     HasCallStack =>
     String ->
-    PropertyT SMT () ->
+    PropertyT MSMT () ->
     TestTree
 testPropertyWithSolver str =
     testProperty str . Hedgehog.property . Morph.hoist (runSMT (pure ()))
@@ -34,12 +34,12 @@ testPropertyWithSolver str =
 testPropertyWithoutSolver ::
     HasCallStack =>
     String ->
-    PropertyT NoSMT () ->
+    PropertyT MSMT () ->
     TestTree
 testPropertyWithoutSolver str =
     testProperty str . Hedgehog.property . Morph.hoist runNoSMT
 
-testCaseWithoutSMT :: String -> NoSMT () -> TestTree
+testCaseWithoutSMT :: String -> MSMT () -> TestTree
 testCaseWithoutSMT str = testCase str . runNoSMT
 
 assertEqual' ::
@@ -55,11 +55,11 @@ assertEqual' ::
     m ()
 assertEqual' str expect = liftIO . assertEqual str expect
 
-runSMT :: SMT () -> SMT a -> IO a
+runSMT :: SMT () -> MSMT a -> IO a
 runSMT = runSMTWithConfig SMT.defaultConfig
 
-runSMTWithConfig :: SMT.Config -> SMT () -> SMT a -> IO a
-runSMTWithConfig config userInit = flip runLoggerT mempty . SMT.runSMT config userInit
+runSMTWithConfig :: SMT.Config -> SMT () -> MSMT a -> IO a
+runSMTWithConfig config userInit = flip runLoggerT mempty . SMT.runWithSolver config userInit
 
-runNoSMT :: NoSMT a -> IO a
-runNoSMT = flip runLoggerT mempty . SMT.runNoSMT
+runNoSMT :: MSMT a -> IO a
+runNoSMT = flip runLoggerT mempty . SMT.runWithoutSolver
