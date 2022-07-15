@@ -139,6 +139,16 @@ import SMT.SimpleSMT qualified as SimpleSMT
 
 -- | Access 'SMT' through monad transformers.
 class Monad m => MonadSMT m where
+
+    liftMSMT :: MSMT a -> m a
+    default liftMSMT ::
+        ( MonadTrans t
+        , MonadSMT n
+        , m ~ t n
+        ) =>
+        MSMT a -> m a
+    liftMSMT = Trans.lift . liftMSMT
+
     withSolver :: m a -> m a
     default withSolver ::
         ( Morph.MFunctor t
@@ -392,6 +402,7 @@ incrementQueryCounter (ResetInterval resetInterval) = do
     pure (toInteger counter >= resetInterval)
 
 instance MonadSMT SMT where
+    liftMSMT = fromMSMT
     withSolver action =
         unshareSolverHandle $ do
             withSolverWithRestart push
@@ -620,6 +631,7 @@ runWithSolver :: Config -> SMT () -> MSMT a -> LoggerT IO a
 runWithSolver config userInit action = runSMT config userInit (fromMSMT action)
 
 instance MonadSMT MSMT where
+    liftMSMT = id
     withSolver action =
         toMSMT (runWithoutSolver action) (withSolver (fromMSMT action))
     declare name typ = toMSMT (return (Atom name)) (declare name typ)

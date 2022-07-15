@@ -21,6 +21,7 @@ import Control.Error (
 import Control.Lens qualified as Lens
 import Control.Monad.Counter qualified as Counter
 import Control.Monad.State.Strict qualified as State
+import Control.Monad.Morph qualified as Morph
 import Data.Generics.Product.Fields
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
@@ -82,6 +83,7 @@ import SMT (
     SExpr (..),
  )
 import SMT qualified
+import SMT (MSMT)
 import SMT.SimpleSMT qualified as SimpleSMT
 
 {- | Attempt to evaluate the 'Predicate' argument with an optional side
@@ -175,12 +177,13 @@ decidePredicate sideCondition predicates =
     query =
         SMT.withSolver . evalTranslator $ do
             tools <- Simplifier.askMetadataTools
-            predicates' <-
-                traverse
-                    (translatePredicate sideCondition tools)
-                    predicates
-            traverse_ SMT.assert predicates'
-            SMT.check
+            Morph.hoist SMT.liftMSMT $ do
+                predicates' <-
+                    traverse
+                        (translatePredicate sideCondition tools)
+                        predicates
+                traverse_ SMT.assert predicates'
+                SMT.check
 
     retry = do
         SMT.reinit
@@ -189,28 +192,23 @@ decidePredicate sideCondition predicates =
         return result
 
 translatePredicate ::
-    forall variable m.
-    ( InternalVariable variable
-    , SMT.MonadSMT m
-    , MonadLog m
-    ) =>
+    forall variable .
+    InternalVariable variable =>
     SideCondition variable ->
     SmtMetadataTools Attribute.Symbol ->
     Predicate variable ->
-    Translator variable m SExpr
+    Translator variable MSMT SExpr
 translatePredicate sideCondition tools predicate =
     translatePredicateWith tools sideCondition translateTerm predicate
 
 translateTerm ::
-    forall m variable.
+    forall variable.
     InternalVariable variable =>
-    SMT.MonadSMT m =>
-    MonadLog m =>
     -- | type name
     SExpr ->
     -- | uninterpreted pattern
     TranslateItem variable ->
-    Translator variable m SExpr
+    Translator variable MSMT SExpr
 translateTerm smtType (QuantifiedVariable var) = do
     n <- Counter.increment
     let varName = "<" <> Text.pack (show n) <> ">"
