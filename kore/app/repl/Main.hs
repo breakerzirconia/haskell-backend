@@ -238,7 +238,7 @@ mainWithOptions LocalOptions{execOptions, simplifierx} = do
                                     \ when running the repl in run-script mode."
                                 exitFailure
 
-                        SMT.runSMT
+                        SMT.runWithSolver
                             smtConfig
                             ( declareSMTLemmas
                                 (MetadataTools.build validatedDefinition)
