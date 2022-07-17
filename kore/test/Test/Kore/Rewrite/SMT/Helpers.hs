@@ -59,7 +59,6 @@ import Prelude.Kore
 import SMT (
     Config (..),
     MSMT,
-    SMT,
     TimeOut (..),
     defaultConfig,
  )
@@ -81,7 +80,7 @@ import Test.Kore.With (
 import Test.Tasty
 import Test.Tasty.HUnit
 
-newtype SmtPrelude = SmtPrelude {getSmtPrelude :: SMT ()}
+newtype SmtPrelude = SmtPrelude {getSmtPrelude :: MSMT ()}
 
 ofType :: SMT.MonadSMT m => Text -> Text -> m ()
 name `ofType` constType = do

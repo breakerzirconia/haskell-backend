@@ -6,14 +6,11 @@ License     : BSD-3-Clause
 Maintainer  : thomas.tuegel@runtimeverification.com
 -}
 module SMT (
-    SMT,
-    getSMT,
-    Solver,
-    stopSolver,
-    runSMT,
     MSMT,
     runWithoutSolver,
     runWithSolver,
+    Solver,
+    stopSolver,
     MonadSMT (..),
     Config (..),
     defaultConfig,
@@ -616,8 +613,8 @@ fromMSMT (MSMT (ReaderT action)) =
 runWithoutSolver :: MSMT a -> LoggerT IO a
 runWithoutSolver action = runReaderT (getMSMT action) Nothing
 
-runWithSolver :: Config -> SMT () -> MSMT a -> LoggerT IO a
-runWithSolver config userInit action = runSMT config userInit (fromMSMT action)
+runWithSolver :: Config -> MSMT () -> MSMT a -> LoggerT IO a
+runWithSolver config userInit action = runSMT config (fromMSMT userInit) (fromMSMT action)
 
 instance MonadSMT MSMT where
     withSolver action =

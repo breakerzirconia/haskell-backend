@@ -16,7 +16,6 @@ import Log (
 import Prelude.Kore
 import SMT (
     MSMT,
-    SMT,
  )
 import SMT qualified
 import Test.Tasty
@@ -55,10 +54,10 @@ assertEqual' ::
     m ()
 assertEqual' str expect = liftIO . assertEqual str expect
 
-runSMT :: SMT () -> MSMT a -> IO a
+runSMT :: MSMT () -> MSMT a -> IO a
 runSMT = runSMTWithConfig SMT.defaultConfig
 
-runSMTWithConfig :: SMT.Config -> SMT () -> MSMT a -> IO a
+runSMTWithConfig :: SMT.Config -> MSMT () -> MSMT a -> IO a
 runSMTWithConfig config userInit = flip runLoggerT mempty . SMT.runWithSolver config userInit
 
 runNoSMT :: MSMT a -> IO a
